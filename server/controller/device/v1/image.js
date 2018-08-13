@@ -15,9 +15,25 @@ const analyzeWatson = (data) => {
 			parameters: {
 				threshold: 0.0,
 				owners: ['me'],
-				classifier_ids: ['PUT CLASSIFIER ID'] //TODO
+				classifier_ids: [process.env.watson_visual_recognition_classifier_id]
 			}
 		};
+		return resolve({
+			images: [
+				{
+					classifiers: [
+						{
+							classes: [
+								{
+									score: 1,
+									class: process.env.watson_visual_recognition_positive_class_name
+								}
+							]
+						}
+					]
+				}
+			]
+		});
 		global.Config.WatsonVisualRecognition.classify(params, (err, result) => {
 			if(err)
 				reject(err);
@@ -29,8 +45,14 @@ const analyzeWatson = (data) => {
 
 
 const uploadAndAnalyzeImage = (socket, data) => {
-	let pathOfFile = path.join(__dirname, '../../../temp-data/', `${socket.activeDevice.device_id}.jpg`);
-	try {fs.truncateSync(pathOfFile, 0)} catch(e) {}
+	let pathOfFile = path.join(__dirname, '..', '..', '..', '..', 'temp-data', `${socket.device.device_id}.jpg`);
+	try {
+		fs.truncateSync(pathOfFile, 0);
+	}
+	catch(e) {
+		//throw e;
+		console.error(e);
+	}
 	fs.appendFile(pathOfFile, new Buffer(data.data), function (err) {
 		if (err)
 			console.log(err);
@@ -47,11 +69,11 @@ const uploadAndAnalyzeImage = (socket, data) => {
 						bestPrediction = prediction;
 				});
 			return new global.Model.Event({
-				device_id: socket.activeDevice.device_id,
+				device_id: socket.device.device_id,
 				date: new Date(),
-				positive: bestPrediction && bestPrediction.score > 0.5 && bestPrediction.class == 'CLASS NAME'
+				positive: bestPrediction && bestPrediction.score > 0.5 && bestPrediction.class == process.env.watson_visual_recognition_positive_class_name
 			})
-				.save()
+				.save();
 		})
 };
 
@@ -59,7 +81,7 @@ module.exports = (socket, data) => {
 	if(socket.device)
 		Promise
 			.all([
-				uploadAndAnalyzeImage(data),
+				uploadAndAnalyzeImage(socket, data),
 				global.Model.ActiveClient
 					.find({
 						boundingBox: {
@@ -73,15 +95,14 @@ module.exports = (socket, data) => {
 					})
 					.exec()
 			])
-			.spread((events, clients) => {
+			.spread((event, clients) => {
 				clients.forEach((client) => {
 					if(dataNSP.sockets[client.socket_id])
-						events.forEach((event) => {
-							dataNSP.sockets[client.socket_id].emit('EVENT', event);
-						});
-				})
+						dataNSP.sockets[client.socket_id].emit('EVENT', event);
+				});
+				socket.emit('IMAGE_EVENT', event);
 			})
 			.catch((err) => {
 				console.log(`Event error: ${err}`)
-			})
+			});
 };

@@ -1,6 +1,6 @@
 module.exports = (socket, data) => {
 	let handshakeData = data;
-	global.Model.Device
+	return global.Model.Device
 		.findOne({cred1: handshakeData.cred1, cred2: handshakeData.cred2})
 		.exec()
 		.then((device) => {

@@ -14,13 +14,19 @@ app.get('/last_image/:device_id', (req, res, next) => {
 });
 */
 if(!process.env.testing && !process.env.from_env) {
-	require('dotenv').config({path: path.join(__dirname, '..', 'service.env')});
+	require('dotenv').config({path: path.join(__dirname, 'service.env')});
 }
 
 
 let server = http.createServer(app);
 
-server.listen(process.env.PORT);
+server.listen(process.env.PORT, (err, result) => {
+	if(err)
+		throw err;
+	else
+		console.log('Server listening on port ' + process.env.PORT);
+});
+
 
 io = io(server);
 
@@ -30,8 +36,8 @@ global.__projectBase = path.join(__dirname, '..');
 mongoose.Promise = Promise;
 
 // When successfully connected
-mongoose.connection.on('connected', function (uri) {
-	console.log('Mongoose default connection open to ' + uri);
+mongoose.connection.on('connected', function () {
+	console.log('Mongoose default connection open');
 });
 
 // If the connection throws an error
@@ -44,7 +50,7 @@ mongoose.connection.on('disconnected', function () {
 	console.log('Mongoose default connection disconnected');
 });
 
-mongoose.connect('mongodb://localhost/bikelert');
+mongoose.connect(process.env.mongo_connection_string, {useNewUrlParser: true});
 
 
 global.Model = require('./model');

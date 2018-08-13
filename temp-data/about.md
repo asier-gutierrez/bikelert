@@ -1,0 +1,1 @@
+This folder is intended to be used for temporary data stored from devices.

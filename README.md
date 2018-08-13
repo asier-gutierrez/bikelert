@@ -49,6 +49,12 @@ service.env variables must follow the format below:
 ```
 watson_visual_recognition_version=
 watson_visual_recognition_apikey=
+watson_visual_recognition_classifier_id=
+watson_visual_recognition_positive_class_name=
 mongo_connection_string=
+test_mongo_connection_string=
+test_device_id=
+test_device_cred1=
+test_device_cred2=
 PORT=
 ```
