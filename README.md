@@ -58,3 +58,11 @@ test_device_cred1=
 test_device_cred2=
 PORT=
 ```
+
+## Testing
+
+Remember adding to devices collection a mock device in order to be able to run tests:
+```
+use <db-name>;
+db.devices.insert({cred1: 'cred1', cred2: 'cred2', location: {type: 'Point', coordinates: [-2.939020,43.270128]}});
+```
