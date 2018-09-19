@@ -25,7 +25,7 @@ test('Send image', () => {
 		let filePath = path.join(__dirname, '..', '..', 'testing_pictures', '1.jpg');
 		fs.readFile(filePath, (err, file) => {
 			if (err)
-				throw err;
+				reject(err);
 			ioDevice.emit('IMAGE', {filename: filePath, data: file});
 		});
 

@@ -18,6 +18,12 @@ const analyzeWatson = (data) => {
 				classifier_ids: [process.env.watson_visual_recognition_classifier_id]
 			}
 		};
+		global.Config.WatsonVisualRecognition.classify(params, (err, result) => {
+			if(err)
+				reject(err);
+			else
+				resolve(result);
+		});
 		return resolve({
 			images: [
 				{
@@ -33,12 +39,6 @@ const analyzeWatson = (data) => {
 					]
 				}
 			]
-		});
-		global.Config.WatsonVisualRecognition.classify(params, (err, result) => {
-			if(err)
-				reject(err);
-			else
-				resolve(result);
 		});
 	});
 };
@@ -96,11 +96,15 @@ module.exports = (socket, data) => {
 					.exec()
 			])
 			.spread((event, clients) => {
-				clients.forEach((client) => {
-					if(dataNSP.sockets[client.socket_id])
-						dataNSP.sockets[client.socket_id].emit('EVENT', event);
-				});
+				// Spreads both positive and negative events to the socket sender.
 				socket.emit('IMAGE_EVENT', event);
+
+				// Only spread positive events to clients-
+				if(event.positive)
+					clients.forEach((client) => {
+						if(dataNSP.sockets[client.socket_id])
+							dataNSP.sockets[client.socket_id].emit('EVENT', event);
+					});
 			})
 			.catch((err) => {
 				console.log(`Event error: ${err}`)
