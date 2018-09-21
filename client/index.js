@@ -1,5 +1,6 @@
 "use strict"
 
+
 let socketio, ioDevice, path, fs, pythonShell, imageInterval,signalTimeout, distance, time, speed, signalStatus, timeBetweenPhotos,
     filePath,photoPath,signalPath;
 
@@ -23,27 +24,26 @@ time = (distance / speed) * 60 * 60 * 1000;
 global.Promise = require('bluebird');
 socketio = require('socket.io-client');
 console.log('PORT', process.env.PORT);
-ioDevice = socketio(`http://localhost:${process.env.PORT}/v1_devices`);
-
+ioDevice = socketio(process.env.IP+':'+process.env.PORT+'/v1_devices');
 
 
 ioDevice.on('IMAGE_EVENT', (event) => {
     var result = JSON.stringify(event.positive);
-
     if(result == 'true'){
-    if(!signalStatus) {
-    pythonShell.run(signalPath, function (err, results) {
-        if (err)
-            throw err;
-        signalStatus = true;
-        signalTimeout = setTimeout(signalManageFunc, time);
-    })
-    }
-    else{
-        clearTimeout(signalTimeout);
-        signalTimeout = setTimeout(signalManageFunc, time);
 
-    }
+        if(!signalStatus) {
+            pythonShell.run(path.join(__dirname, photoPath), null, function (err, results) {
+                if (err)
+                    throw err;
+                signalStatus = true;
+                signalTimeout = setTimeout(signalManageFunc, time);
+            })
+        }
+        else{
+            clearTimeout(signalTimeout);
+            signalTimeout = setTimeout(signalManageFunc, time);
+
+        }
     }
 });
 
@@ -51,10 +51,10 @@ ioDevice.on('IMAGE_EVENT', (event) => {
 
 ioDevice.on('connect', () => {
     console.log("Connected");
-ioDevice.emit('LOGIN', {
-    cred1: process.env.device_cred1,
-    cred2: process.env.device_cred2
-});
+    ioDevice.emit('LOGIN', {
+        cred1: process.env.device_cred1,
+        cred2: process.env.device_cred2
+    });
 });
 
 ioDevice.on('LOGIN_SUCCESSFUL', (data) => {
@@ -81,15 +81,15 @@ ioDevice.on('disconnect', () => {
 let intervalFunc = () => {
     console.log('Taking image...');
 
-    pythonShell.run(photoPath, function (err, results) {
+    pythonShell.run(path.join(__dirname, signalPath), function (err, results) {
         if (err)
             throw err;
         fs.readFile(filePath, (err, file) => {
             if(err)
-            throw err;
-        ioDevice.emit('IMAGE', {filename: filePath, data: file});
+                throw err;
+            ioDevice.emit('IMAGE', {filename: filePath, data: file});
 
-    });
+        });
     })
 
 }
