@@ -24,22 +24,6 @@ const analyzeWatson = (data) => {
 			else
 				resolve(result);
 		});
-		return resolve({
-			images: [
-				{
-					classifiers: [
-						{
-							classes: [
-								{
-									score: 1,
-									class: process.env.watson_visual_recognition_positive_class_name
-								}
-							]
-						}
-					]
-				}
-			]
-		});
 	});
 };
 
