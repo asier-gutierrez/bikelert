@@ -45,7 +45,7 @@ service.env variables must follow the format below:
 ...
 ```
 
-## V1 Environment variables
+## V1 Environment variables - Server
 ```
 watson_visual_recognition_version=
 watson_visual_recognition_apikey=
@@ -57,6 +57,19 @@ test_device_id=
 test_device_cred1=
 test_device_cred2=
 PORT=
+```
+
+## V1 Environment variables - Client
+```
+time_between_photo=
+distance=
+speed=
+IP=
+PORT=
+photoPath=
+signalPath=
+device_cred1=
+device_cred2=
 ```
 
 ## Testing
